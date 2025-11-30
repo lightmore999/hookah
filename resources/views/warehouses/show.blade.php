@@ -95,7 +95,7 @@
                         </div>
                         <div class="mb-4">
                             <x-input-label for="target_warehouse_id" value="Склад назначения" />
-                            <select id="target_warehouse_id" name="target_warehouse_id" x-model="targetWarehouseId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                            <select id="target_warehouse_id" name="target_warehouse_id" x-model="targetWarehouseId" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                                 <option value="">Выберите склад</option>
                                 @foreach($otherWarehouses as $otherWarehouse)
                                     <option value="{{ $otherWarehouse->id }}">{{ $otherWarehouse->name }}</option>

@@ -153,7 +153,7 @@
 
                 <div>
                     <x-input-label for="comment" value="Комментарий" />
-                    <textarea id="comment" name="comment" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('comment') }}</textarea>
+                    <textarea id="comment" name="comment" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none">{{ old('comment') }}</textarea>
                     <x-input-error class="mt-2" :messages="$errors->get('comment')" />
                 </div>
 
@@ -206,25 +206,25 @@
 
                     <div>
                         <x-input-label for="name_edit" value="Имя" />
-                        <input id="name_edit" name="name" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required autofocus />
+                        <input id="name_edit" name="name" type="text" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required autofocus />
                         <x-input-error class="mt-2" :messages="$errors->get('name')" />
                     </div>
 
                     <div>
                         <x-input-label for="phone_edit" value="Номер телефона" />
-                        <input id="phone_edit" name="phone" type="tel" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required />
+                        <input id="phone_edit" name="phone" type="tel" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required />
                         <x-input-error class="mt-2" :messages="$errors->get('phone')" />
                     </div>
 
                     <div>
                         <x-input-label for="birth_date_edit" value="Дата рождения" />
-                        <input id="birth_date_edit" name="birth_date" type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                        <input id="birth_date_edit" name="birth_date" type="date" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" />
                         <x-input-error class="mt-2" :messages="$errors->get('birth_date')" />
                     </div>
 
                     <div>
                         <x-input-label for="comment_edit" value="Комментарий" />
-                        <textarea id="comment_edit" name="comment" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                        <textarea id="comment_edit" name="comment" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none"></textarea>
                         <x-input-error class="mt-2" :messages="$errors->get('comment')" />
                     </div>
 

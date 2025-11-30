@@ -13,10 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('table_bookings', function (Blueprint $table) {
-            $table->foreignId('client_id')->nullable()->after('id')->constrained('clients')->onDelete('set null');
-            $table->enum('status', ['not_opened', 'opened', 'closed'])->default('not_opened')->after('comment');
-        });
+        if (!Schema::hasColumn('table_bookings', 'client_id')) {
+            Schema::table('table_bookings', function (Blueprint $table) {
+                $table->foreignId('client_id')->nullable()->after('id')->constrained('clients')->onDelete('set null');
+            });
+        }
+        
+        if (!Schema::hasColumn('table_bookings', 'status')) {
+            Schema::table('table_bookings', function (Blueprint $table) {
+                $table->enum('status', ['not_opened', 'opened', 'closed'])->default('not_opened')->after('comment');
+            });
+        }
     }
 
     /**
@@ -26,9 +33,21 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('table_bookings', function (Blueprint $table) {
-            $table->dropForeign(['client_id']);
-            $table->dropColumn(['client_id', 'status']);
-        });
+        if (Schema::hasColumn('table_bookings', 'client_id')) {
+            Schema::table('table_bookings', function (Blueprint $table) {
+                try {
+                    $table->dropForeign(['client_id']);
+                } catch (\Exception $e) {
+                    // Внешний ключ может не существовать, игнорируем ошибку
+                }
+                $table->dropColumn('client_id');
+            });
+        }
+        
+        if (Schema::hasColumn('table_bookings', 'status')) {
+            Schema::table('table_bookings', function (Blueprint $table) {
+                $table->dropColumn('status');
+            });
+        }
     }
 };

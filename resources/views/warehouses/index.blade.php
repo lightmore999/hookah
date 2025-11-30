@@ -207,7 +207,7 @@
 
                     <div>
                         <x-input-label for="name_edit" value="Название" />
-                        <input id="name_edit" name="name" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required autofocus />
+                        <input id="name_edit" name="name" type="text" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required autofocus />
                         <x-input-error class="mt-2" :messages="$errors->get('name')" />
                     </div>
 
@@ -250,7 +250,7 @@
 
                 <div>
                     <x-input-label for="product_id" value="Товар" />
-                    <select id="product_id" name="product_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    <select id="product_id" name="product_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                         <option value="">Выберите товар</option>
                         <template x-for="product in products" :key="product.id">
                             <option :value="product.id" x-text="product.name"></option>
@@ -261,7 +261,7 @@
 
                 <div>
                     <x-input-label for="warehouse_id" value="Склад" />
-                    <select id="warehouse_id" name="warehouse_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    <select id="warehouse_id" name="warehouse_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                         <option value="">Выберите склад</option>
                         <template x-for="warehouse in warehouses" :key="warehouse.id">
                             <option :value="warehouse.id" x-text="warehouse.name"></option>

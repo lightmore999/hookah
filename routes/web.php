@@ -23,16 +23,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return redirect()->route('home');
+    return redirect()->route('tables.index');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/home', function () {
-        return view('home');
-    })->name('home');
-    
     Route::get('/dashboard', function () {
-        return redirect()->route('home');
+        return redirect()->route('tables.index');
     })->name('dashboard');
     
     
@@ -40,9 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('sales', SaleController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::get('sales/search/clients', [SaleController::class, 'searchClients'])->name('sales.search.clients');
     
-    Route::get('/accounting', function () {
-        return view('accounting.index');
-    })->name('accounting.index');
+    Route::get('/accounting', [\App\Http\Controllers\AccountingController::class, 'index'])->name('accounting.index');
     
     Route::resource('hookahs', HookahController::class);
     Route::resource('categories', CategoryController::class);
@@ -50,6 +44,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('tables', TableController::class);
     Route::get('tables/search/clients', [TableController::class, 'searchClients'])->name('tables.search.clients');
     Route::post('tables/{table}/status', [TableController::class, 'updateStatus'])->name('tables.update.status');
+    Route::post('tables/add-hookah', [TableController::class, 'addHookah'])->name('tables.add-hookah');
+    Route::post('tables/close', [TableController::class, 'close'])->name('tables.close');
     Route::resource('warehouses', WarehouseController::class);
     Route::post('warehouses/{warehouse}/stock-levels/{stockLevel}/move', [WarehouseController::class, 'moveStock'])->name('warehouses.stock-levels.move');
     Route::post('warehouses/{warehouse}/stock-levels/{stockLevel}/writeoff-work', [WarehouseController::class, 'writeoffWork'])->name('warehouses.stock-levels.writeoff-work');

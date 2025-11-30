@@ -33,7 +33,7 @@
                             </div>
                             <div>
                                 <x-input-label for="category_id" value="Фильтр по категории" />
-                                <select id="category_id" name="category_id" onchange="document.getElementById('filterForm').submit();" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select id="category_id" name="category_id" onchange="document.getElementById('filterForm').submit();" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none">
                                     <option value="">Все категории</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
@@ -157,7 +157,7 @@
 
                 <div>
                     <x-input-label for="category_id" value="Категория" />
-                    <select id="category_id" name="category_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    <select id="category_id" name="category_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                         <option value="">Выберите категорию</option>
                         <template x-for="category in categories" :key="category.id">
                             <option :value="category.id" x-text="category.name"></option>
@@ -227,13 +227,13 @@
 
                     <div>
                         <x-input-label for="name_edit" value="Название" />
-                        <input id="name_edit" name="name" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required autofocus />
+                        <input id="name_edit" name="name" type="text" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required autofocus />
                         <x-input-error class="mt-2" :messages="$errors->get('name')" />
                     </div>
 
                     <div>
                         <x-input-label for="category_id_edit" value="Категория" />
-                        <select id="category_id_edit" name="category_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                        <select id="category_id_edit" name="category_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                             <option value="">Выберите категорию</option>
                             <template x-for="category in categories" :key="category.id">
                                 <option :value="category.id" x-text="category.name"></option>
@@ -244,13 +244,13 @@
 
                     <div>
                         <x-input-label for="price_edit" value="Цена" />
-                        <input id="price_edit" name="price" type="number" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required />
+                        <input id="price_edit" name="price" type="number" step="0.01" min="0" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required />
                         <x-input-error class="mt-2" :messages="$errors->get('price')" />
                     </div>
 
                     <div>
                         <x-input-label for="cost_edit" value="Себестоимость" />
-                        <input id="cost_edit" name="cost" type="number" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required />
+                        <input id="cost_edit" name="cost" type="number" step="0.01" min="0" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required />
                         <x-input-error class="mt-2" :messages="$errors->get('cost')" />
                     </div>
 

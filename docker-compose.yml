@@ -1,0 +1,58 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hookah_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./storage:/var/www/html/storage
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-hookah}
+      - DB_USERNAME=${DB_USERNAME:-hookah_user}
+      - DB_PASSWORD=${DB_PASSWORD:-hookah_password}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - hookah_network
+
+  db:
+    image: mysql:8.0
+    container_name: hookah_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-hookah}
+      MYSQL_USER: ${DB_USERNAME:-hookah_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-hookah_password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - hookah_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_password"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  hookah_network:
+    driver: bridge
+

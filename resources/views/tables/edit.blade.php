@@ -30,7 +30,7 @@
                                        "
                                        @click.away="showClientResults = false"
                                        placeholder="Поиск по имени или телефону..."
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" />
                                 <input type="hidden" name="client_id" x-model="selectedClient?.id">
                                 <div x-show="selectedClient" class="mt-2 flex items-center gap-2 p-2 bg-blue-50 rounded">
                                     <span x-text="selectedClient?.name + ' - ' + selectedClient?.phone"></span>
@@ -55,7 +55,7 @@
 
                         <div>
                             <x-input-label for="table_number" value="Стол" />
-                            <select id="table_number" name="table_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                            <select id="table_number" name="table_number" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                                 <option value="">Выберите стол</option>
                                 @foreach($tableNumbers as $tableNum)
                                     <option value="{{ $tableNum }}" {{ old('table_number', $table->table_number) == $tableNum ? 'selected' : '' }}>
@@ -104,7 +104,7 @@
 
                         <div>
                             <x-input-label for="comment" value="Комментарий" />
-                            <textarea id="comment" name="comment" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('comment', $table->comment) }}</textarea>
+                            <textarea id="comment" name="comment" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none">{{ old('comment', $table->comment) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('comment')" />
                         </div>
 

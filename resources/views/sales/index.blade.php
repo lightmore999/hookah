@@ -139,7 +139,7 @@
                         <x-input-label for="category_filter" value="Категория" />
                         <select id="category_filter"
                                 x-model="selectedCategoryId"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none">
                             <option value="">Все категории</option>
                             <template x-for="category in categories" :key="category.id">
                                 <option :value="category.id" x-text="category.name"></option>
@@ -152,7 +152,7 @@
                         <select id="product_id"
                                 name="product_id"
                                 x-model="selectedProductId"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none"
                                 required>
                             <option value="">Выберите товар</option>
                             <template x-for="product in filteredProducts" :key="product.id">
@@ -169,7 +169,7 @@
                         <x-input-label for="warehouse_id" value="Склад" />
                         <select id="warehouse_id"
                                 name="warehouse_id"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none"
                                 required>
                             <option value="">Выберите склад</option>
                             <template x-for="warehouse in warehouses" :key="warehouse.id">
@@ -201,7 +201,7 @@
                                @input.debounce.300ms="searchClients"
                                @click.away="showClientResults = false"
                                placeholder="Поиск по имени или телефону..."
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" />
                         <input type="hidden" name="client_id" :value="selectedClientId">
 
                         <div x-show="selectedClient"
@@ -323,7 +323,7 @@
                             <x-input-label for="category_filter_edit" value="Категория" />
                             <select id="category_filter_edit"
                                     x-model="selectedCategoryId"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none">
                                 <option value="">Все категории</option>
                                 <template x-for="category in categories" :key="category.id">
                                     <option :value="category.id" x-text="category.name"></option>
@@ -336,7 +336,7 @@
                             <select id="product_id_edit"
                                     name="product_id"
                                     x-model="selectedProductId"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none"
                                     required>
                                 <option value="">Выберите товар</option>
                                 <template x-for="product in filteredProducts" :key="product.id">
@@ -353,7 +353,7 @@
                             <select id="warehouse_id_edit"
                                     name="warehouse_id"
                                     x-model="selectedWarehouseId"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none"
                                     required>
                                 <option value="">Выберите склад</option>
                                 <template x-for="warehouse in warehouses" :key="warehouse.id">
@@ -383,7 +383,7 @@
                                    @input.debounce.300ms="searchClients"
                                    @click.away="showClientResults = false"
                                    placeholder="Поиск по имени или телефону..."
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" />
                             <input type="hidden" name="client_id" :value="selectedClientId">
 
                             <div x-show="selectedClient"

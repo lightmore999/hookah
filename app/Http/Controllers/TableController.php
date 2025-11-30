@@ -8,6 +8,10 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Warehouse;
 use App\Models\Sale;
+use App\Models\Hookah;
+use App\Models\User;
+use App\Models\TableClosure;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -65,10 +69,36 @@ class TableController extends Controller
             })->values();
         });
 
+        // Кальяны, привязанные к этим бронированиям (группируем одинаковые кальяны с количеством)
+        $hookahsByBooking = DB::table('table_booking_hookahs')
+            ->join('hookahs', 'table_booking_hookahs.hookah_id', '=', 'hookahs.id')
+            ->whereIn('table_booking_hookahs.table_booking_id', $bookings->pluck('id'))
+            ->select('table_booking_hookahs.table_booking_id', 'hookahs.id', 'hookahs.name', 'hookahs.price')
+            ->get()
+            ->groupBy('table_booking_id')
+            ->map(function ($group) {
+                // Группируем одинаковые кальяны и считаем количество
+                $grouped = $group->groupBy('id')->map(function ($items, $hookahId) {
+                    $first = $items->first();
+                    return [
+                        'id' => (int)$first->id,
+                        'name' => $first->name,
+                        'price' => (float)$first->price,
+                        'quantity' => $items->count(),
+                    ];
+                })->values();
+                return $grouped;
+            })
+            ->mapWithKeys(function ($item, $key) {
+                return [(string)$key => $item];
+            });
+
         // Справочники для формы продаж по столу
         $products = Product::with('category')->orderBy('name')->get();
         $categories = Category::orderBy('name')->get();
         $warehouses = Warehouse::orderBy('name')->get();
+        $hookahs = \App\Models\Hookah::orderBy('name')->get();
+        $users = User::orderBy('name')->get();
 
         // Определяем активную кнопку фильтра
         $activeFilter = 'custom';
@@ -91,9 +121,12 @@ class TableController extends Controller
             'selectedDate' => $selectedDate,
             'bookingsData' => $bookingsData,
             'salesByBooking' => $salesByBooking,
+            'hookahsByBooking' => $hookahsByBooking,
             'products' => $products,
             'categories' => $categories,
             'warehouses' => $warehouses,
+            'hookahs' => $hookahs,
+            'users' => $users,
         ]);
     }
 
@@ -310,5 +343,88 @@ class TableController extends Controller
 
         return redirect()->route('tables.index', ['date' => $table->booking_date->format('Y-m-d')])
             ->with('success', 'Статус стола успешно обновлен.');
+    }
+
+    /**
+     * Add hookah to table booking.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function addHookah(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'table_booking_id' => 'required|exists:table_bookings,id',
+            'hookah_id' => 'required|exists:hookahs,id',
+        ]);
+
+        // Добавляем кальян к столу (можно добавлять одинаковые кальяны несколько раз)
+        DB::table('table_booking_hookahs')->insert([
+            'table_booking_id' => $validated['table_booking_id'],
+            'hookah_id' => $validated['hookah_id'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $table = Table::find($validated['table_booking_id']);
+
+        return redirect()->route('tables.index', [
+            'date' => $table->booking_date->format('Y-m-d'),
+            'open_hookahs' => $validated['table_booking_id']
+        ])->with('success', 'Кальян успешно добавлен к столу.');
+    }
+
+    /**
+     * Close table with bill details.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function close(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'table_booking_id' => 'required|exists:table_bookings,id',
+            'hookahs_amount' => 'nullable|numeric|min:0',
+            'tips_amount' => 'nullable|numeric|min:0',
+            'sales_amount' => 'nullable|numeric|min:0',
+            'discount_amount' => 'nullable|numeric|min:0',
+            'discount_type' => 'required|in:rub,percent',
+            'payment_method' => 'required|in:cash,card',
+            'employee_id' => 'nullable|exists:users,id',
+            'comment' => 'nullable|string|max:1000',
+        ]);
+
+        $table = Table::findOrFail($validated['table_booking_id']);
+
+        // Рассчитываем итоговую сумму
+        $total = ($validated['hookahs_amount'] ?? 0) + ($validated['tips_amount'] ?? 0) + ($validated['sales_amount'] ?? 0);
+        if ($validated['discount_type'] === 'rub') {
+            $total -= ($validated['discount_amount'] ?? 0);
+        } else {
+            $total = $total * (1 - ($validated['discount_amount'] ?? 0) / 100);
+        }
+        $total = max(0, $total);
+
+        // Сохраняем данные о закрытии стола
+        TableClosure::create([
+            'table_booking_id' => $validated['table_booking_id'],
+            'hookahs_amount' => $validated['hookahs_amount'] ?? 0,
+            'tips_amount' => $validated['tips_amount'] ?? 0,
+            'sales_amount' => $validated['sales_amount'] ?? 0,
+            'discount_amount' => $validated['discount_amount'] ?? 0,
+            'discount_type' => $validated['discount_type'],
+            'payment_method' => $validated['payment_method'],
+            'employee_id' => $validated['employee_id'] ?? null,
+            'comment' => $validated['comment'] ?? null,
+            'total_amount' => $total,
+            'closed_at' => now(),
+        ]);
+
+        // Обновляем статус стола на закрыт
+        $table->update(['status' => 'closed']);
+
+        return redirect()->route('tables.index', [
+            'date' => $table->booking_date->format('Y-m-d')
+        ])->with('success', 'Стол успешно закрыт.');
     }
 }

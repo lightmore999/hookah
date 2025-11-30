@@ -133,7 +133,63 @@
                                             <td class="border border-gray-300 p-1 min-h-[30px] relative {{ $isHourMark ? 'bg-gray-50' : '' }}" 
                                                 @if($cellBooking && $rowspan > 1) rowspan="{{ $rowspan }}" @endif>
                                                 @if($cellBooking)
-                                                    <div class="bg-blue-100 border border-blue-300 rounded p-1 text-xs h-full flex flex-col">
+                                                    <div class="bg-blue-100 border border-blue-300 rounded p-1 text-xs h-full flex flex-col relative">
+                                                        <div class="absolute top-1 right-1">
+                                                            <div class="relative inline-block" @click.away="tableMenuOpen = null">
+                                                                <button type="button" 
+                                                                        @click.stop="tableMenuOpen = tableMenuOpen === {{ $cellBooking->id }} ? null : {{ $cellBooking->id }}"
+                                                                        class="text-[12px] text-gray-600 hover:text-gray-900 font-bold cursor-pointer leading-none">
+                                                                    ⋮
+                                                                </button>
+                                                                <div x-show="tableMenuOpen === {{ $cellBooking->id }}"
+                                                                     x-cloak
+                                                                     @click.stop
+                                                                     x-transition:enter="transition ease-out duration-100"
+                                                                     x-transition:enter-start="opacity-0 scale-95"
+                                                                     x-transition:enter-end="opacity-100 scale-100"
+                                                                     x-transition:leave="transition ease-in duration-75"
+                                                                     x-transition:leave-start="opacity-100 scale-100"
+                                                                     x-transition:leave-end="opacity-0 scale-95"
+                                                                     class="absolute right-0 top-full mt-1 w-32 bg-white border border-gray-300 rounded-md shadow-lg z-[10001] py-1">
+                                                                    <button type="button" 
+                                                                            @click="
+                                                                                editTable = bookingsData.find(b => b.id === {{ $cellBooking->id }});
+                                                                                showEditModal = true;
+                                                                                tableMenuOpen = null;
+                                                                            " 
+                                                                            class="w-full text-left px-3 py-1 text-[10px] text-blue-600 hover:bg-blue-50">
+                                                                        Изменить
+                                                                    </button>
+                                                                    <form action="{{ route('tables.destroy', $cellBooking) }}" 
+                                                                          method="POST" 
+                                                                          class="inline w-full"
+                                                                          onsubmit="return confirm('Удалить бронирование?');">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" 
+                                                                                class="w-full text-left px-3 py-1 text-[10px] text-red-600 hover:bg-red-50">
+                                                                            Удалить
+                                                                        </button>
+                                                                    </form>
+                                                                    <button type="button"
+                                                                            @click="
+                                                                                openHookahsForBooking({{ $cellBooking->id }});
+                                                                                tableMenuOpen = null;
+                                                                            "
+                                                                            class="w-full text-left px-3 py-1 text-[10px] text-gray-600 hover:bg-gray-50">
+                                                                        Кальяны
+                                                                    </button>
+                                                                    <button type="button"
+                                                                            @click="
+                                                                                openSalesForBooking({{ $cellBooking->id }});
+                                                                                tableMenuOpen = null;
+                                                                            "
+                                                                            class="w-full text-left px-3 py-1 text-[10px] text-green-600 hover:bg-green-50">
+                                                                        Продажи
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                         <div class="flex-1"></div>
                                                         <div class="text-center mt-auto mb-1">
                                                             @if($cellBooking->guest_name)
@@ -152,23 +208,6 @@
                                                                 </div>
                                                             </div>
                                                         @endif
-                                                        <div class="mt-1 flex gap-1 flex-wrap">
-                                                            <button type="button" @click="
-                                                                editTable = bookingsData.find(b => b.id === {{ $cellBooking->id }});
-                                                                showEditModal = true;
-                                                            " class="text-[10px] text-blue-600 hover:text-blue-900">Изменить</button>
-                                                            <form action="{{ route('tables.destroy', $cellBooking) }}" method="POST" class="inline" onsubmit="return confirm('Удалить бронирование?');">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="text-[10px] text-red-600 hover:text-red-900">Удалить</button>
-                                                            </form>
-                                                            <span class="text-[10px] text-gray-500 cursor-not-allowed">Кальяны</span>
-                                                            <button type="button"
-                                                                    @click="openSalesForBooking({{ $cellBooking->id }})"
-                                                                    class="text-[10px] text-green-600 hover:text-green-900">
-                                                                Продажи
-                                                            </button>
-                                                        </div>
                                                         @if($cellBooking->status === 'not_opened')
                                                             <form action="{{ route('tables.update.status', $cellBooking) }}" method="POST" class="mt-1">
                                                                 @csrf
@@ -177,12 +216,11 @@
                                                                 <button type="submit" class="w-full text-[10px] bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded">Открыть стол</button>
                                                             </form>
                                                         @elseif($cellBooking->status === 'opened')
-                                                            <form action="{{ route('tables.update.status', $cellBooking) }}" method="POST" class="mt-1">
-                                                                @csrf
-                                                                @method('POST')
-                                                                <input type="hidden" name="status" value="closed">
-                                                                <button type="submit" class="w-full text-[10px] bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">Закрыть стол</button>
-                                                            </form>
+                                                            <button type="button" 
+                                                                    @click="openCloseTableModal({{ $cellBooking->id }})"
+                                                                    class="w-full text-[10px] bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">
+                                                                Закрыть стол
+                                                            </button>
                                                         @endif
                                                     </div>
                                                 @endif
@@ -253,7 +291,7 @@
                                "
                                @click.away="showClientResults = false"
                                placeholder="Поиск по имени или телефону..."
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" />
                         <input type="hidden" name="client_id" x-model="selectedClientId">
                         <div x-show="selectedClient" class="mt-2 flex items-center gap-2 p-2 bg-blue-50 rounded">
                             <span x-text="(selectedClient && (selectedClient.name + ' - ' + selectedClient.phone)) || ''"></span>
@@ -278,7 +316,7 @@
 
                 <div>
                     <x-input-label for="table_number" value="Стол" />
-                    <select id="table_number" name="table_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    <select id="table_number" name="table_number" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                         <option value="">Выберите стол</option>
                         @foreach($tableNumbers as $tableNum)
                             <option value="{{ $tableNum }}" {{ old('table_number') == $tableNum ? 'selected' : '' }}>{{ $tableNum }}</option>
@@ -295,7 +333,7 @@
 
                 <div>
                     <x-input-label for="booking_time" value="Время бронирования" />
-                    <select id="booking_time" name="booking_time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    <select id="booking_time" name="booking_time" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                         <option value="">Выберите время</option>
                         @php
                             $startTime = \Carbon\Carbon::parse('14:00');
@@ -314,7 +352,7 @@
 
                 <div>
                     <x-input-label for="duration" value="Длительность" />
-                    <select id="duration" name="duration" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    <select id="duration" name="duration" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                         @php
                             $durations = [
                                 60 => '1 час',
@@ -354,7 +392,7 @@
 
                 <div>
                     <x-input-label for="comment" value="Комментарий" />
-                    <textarea id="comment" name="comment" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('comment') }}</textarea>
+                    <textarea id="comment" name="comment" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none">{{ old('comment') }}</textarea>
                     <x-input-error class="mt-2" :messages="$errors->get('comment')" />
                 </div>
 
@@ -456,7 +494,7 @@
                                        "
                                        @click.away="showClientResults = false"
                                        placeholder="Поиск по имени или телефону..."
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" />
                                 <input type="hidden" name="client_id" x-model="selectedClientId">
                                 <div x-show="selectedClient" class="mt-2 flex items-center gap-2 p-2 bg-blue-50 rounded">
                                     <span x-text="(selectedClient && (selectedClient.name + ' - ' + selectedClient.phone)) || ''"></span>
@@ -481,7 +519,7 @@
 
                         <div>
                             <x-input-label for="table_number_edit" value="Стол" />
-                            <select id="table_number_edit" name="table_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                            <select id="table_number_edit" name="table_number" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                                 <option value="">Выберите стол</option>
                                 <template x-for="tableNum in tableNumbers" :key="tableNum">
                                     <option :value="tableNum" x-text="tableNum"></option>
@@ -491,12 +529,12 @@
 
                         <div>
                             <x-input-label for="booking_date_edit" value="Дата бронирования" />
-                            <input id="booking_date_edit" name="booking_date" type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required />
+                            <input id="booking_date_edit" name="booking_date" type="date" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required />
                         </div>
 
                         <div>
                             <x-input-label for="booking_time_edit" value="Время бронирования" />
-                            <select id="booking_time_edit" name="booking_time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                            <select id="booking_time_edit" name="booking_time" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                                 <option value="">Выберите время</option>
                                 @php
                                     $startTime = \Carbon\Carbon::parse('14:00');
@@ -513,7 +551,7 @@
 
                         <div>
                             <x-input-label for="duration_edit" value="Длительность" />
-                            <select id="duration_edit" name="duration" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                            <select id="duration_edit" name="duration" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                                 @php
                                     $durations = [
                                         60 => '1 час',
@@ -533,22 +571,22 @@
 
                         <div>
                             <x-input-label for="guests_count_edit" value="Количество гостей" />
-                            <input id="guests_count_edit" name="guests_count" type="number" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required />
+                            <input id="guests_count_edit" name="guests_count" type="number" min="1" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required />
                         </div>
 
                         <div x-show="!selectedClient">
                             <x-input-label for="guest_name_edit" value="Имя гостя" />
-                            <input id="guest_name_edit" name="guest_name" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                            <input id="guest_name_edit" name="guest_name" type="text" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" />
                         </div>
 
                         <div x-show="!selectedClient">
                             <x-input-label for="phone_edit" value="Номер телефона" />
-                            <input id="phone_edit" name="phone" type="tel" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                            <input id="phone_edit" name="phone" type="tel" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" />
                         </div>
 
                         <div>
                             <x-input-label for="comment_edit" value="Комментарий" />
-                            <textarea id="comment_edit" name="comment" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                            <textarea id="comment_edit" name="comment" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none"></textarea>
                         </div>
 
                         <div class="flex items-center gap-4">
@@ -654,7 +692,7 @@
                             <x-input-label for="table_category_filter" value="Категория" />
                             <select id="table_category_filter"
                                     x-model="selectedCategoryId"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs">
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none text-xs">
                                 <option value="">Все категории</option>
                                 <template x-for="category in categories" :key="category.id">
                                     <option :value="category.id" x-text="category.name"></option>
@@ -666,7 +704,7 @@
                             <select id="table_product_id"
                                     name="product_id"
                                     x-model="selectedProductId"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none text-xs"
                                     required>
                                 <option value="">Выберите товар</option>
                                 <template x-for="product in filteredProducts" :key="product.id">
@@ -682,7 +720,7 @@
                             <select id="table_warehouse_id"
                                     name="warehouse_id"
                                     x-model="selectedWarehouseId"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none text-xs"
                                     required>
                                 <option value="">Выберите склад</option>
                                 <template x-for="warehouse in warehouses" :key="warehouse.id">
@@ -708,7 +746,7 @@
                             <input id="table_sold_at"
                                    name="sold_at"
                                    type="datetime-local"
-                                   class="mt-1 block w-full text-xs rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                   class="mt-1 block w-full text-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none"
                                    x-model="soldAt"
                                    required />
                         </div>
@@ -755,23 +793,333 @@
         </div>
     </div>
 
+    <!-- Модальное окно кальянов за столом -->
+    <div x-show="showHookahsModal" 
+         x-cloak 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" 
+         style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;" 
+         @click.away="showHookahsModal = false"
+         @keydown.escape.window="showHookahsModal = false">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white" style="position: relative; z-index: 10000; margin: 5rem auto;">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Кальяны за столом</h3>
+                <button @click="showHookahsModal = false" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Список существующих кальянов -->
+            <div x-show="currentHookahs.length > 0" class="mb-4">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Кальяны за столом:</h4>
+                <div class="space-y-2">
+                    <template x-for="hookah in currentHookahs" :key="hookah.id + '-' + hookah.quantity">
+                        <div class="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded-md">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-700" x-text="hookah.name"></span>
+                                <span x-show="hookah.quantity > 1" class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full" x-text="'×' + hookah.quantity"></span>
+                            </div>
+                            <span class="text-sm font-medium text-gray-900" x-text="formatMoney(hookah.price * (hookah.quantity || 1))"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Предупреждение, если кальянов нет -->
+            <div x-show="currentHookahs.length === 0" class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md flex items-start">
+                <svg class="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-sm text-gray-700">За этим столом еще не было кальянов</span>
+            </div>
+
+            <form method="POST" action="{{ route('tables.add-hookah') }}" class="space-y-4" @submit="selectedHookahId = null">
+                @csrf
+                <input type="hidden" name="table_booking_id" x-model="currentHookahBookingId">
+
+                <div>
+                    <x-input-label for="hookah_id" value="Добавить кальян" />
+                    <select id="hookah_id" 
+                            name="hookah_id" 
+                            x-model="selectedHookahId"
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none"
+                            required>
+                        @if(count($hookahs) === 0)
+                            <option value="">Список кальянов еще не добавлен директором...</option>
+                        @else
+                            <option value="" disabled>Выберите кальян</option>
+                            @foreach($hookahs as $hookah)
+                                <option value="{{ $hookah->id }}">{{ $hookah->name }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                    @error('hookah_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="flex items-center justify-end gap-3">
+                    <x-primary-button>Добавить</x-primary-button>
+                    <button type="button"
+                            @click="showHookahsModal = false; selectedHookahId = null"
+                            class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        Закрыть
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно закрытия стола -->
+    <div x-show="showCloseTableModal" 
+         x-cloak 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" 
+         style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;" 
+         @click.away="showCloseTableModal = false"
+         @keydown.escape.window="showCloseTableModal = false">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white" style="position: relative; z-index: 10000; margin: 5rem auto;">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Закрыть стол</h3>
+                <button @click="showCloseTableModal = false" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('tables.close') }}" class="space-y-4">
+                @csrf
+                <input type="hidden" name="table_booking_id" x-model="closeTableBookingId">
+
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Левая колонка - СЧЕТ -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">СЧЕТ</h4>
+                        <div class="space-y-3">
+                            <!-- Кальяны -->
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">Кальяны</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" 
+                                           step="0.01" 
+                                           min="0"
+                                           x-model.number="hookahsAmount"
+                                           name="hookahs_amount"
+                                           readonly
+                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-700">
+                                    <span class="text-sm text-gray-600">руб.</span>
+                                </div>
+                            </div>
+
+                            <!-- Чаевые -->
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">Чаевые</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" 
+                                           step="0.01" 
+                                           min="0"
+                                           x-model.number="tipsAmount"
+                                           name="tips_amount"
+                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none">
+                                    <span class="text-sm text-gray-600">руб.</span>
+                                </div>
+                            </div>
+
+                            <!-- Продажи -->
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">Продажи</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" 
+                                           step="0.01" 
+                                           min="0"
+                                           x-model.number="salesAmount"
+                                           name="sales_amount"
+                                           readonly
+                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-700">
+                                    <span class="text-sm text-gray-600">руб.</span>
+                                </div>
+                            </div>
+
+                            <!-- Скидка -->
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">Скидка</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" 
+                                           step="0.01" 
+                                           min="0"
+                                           :max="discountType === 'percent' ? 100 : null"
+                                           x-model.number="discountAmount"
+                                           name="discount_amount"
+                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none">
+                                    <span class="text-sm text-gray-600" x-text="discountType === 'rub' ? 'руб.' : '%'"></span>
+                                    <button type="button" 
+                                            @click="discountType = discountType === 'rub' ? 'percent' : 'rub'; discountAmount = 0"
+                                            class="text-sm text-blue-600 hover:text-blue-800 underline">
+                                        <span x-show="discountType === 'rub'">руб. / %</span>
+                                        <span x-show="discountType === 'percent'">% / руб.</span>
+                                    </button>
+                                </div>
+                                <input type="hidden" name="discount_type" x-model="discountType">
+                            </div>
+
+                            <!-- ИТОГО -->
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">ИТОГО</label>
+                                <div class="text-lg font-bold text-gray-900">
+                                    <span x-text="formatMoney(closeTableTotal)"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Правая колонка - Детали заказа -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">КАЛЬЯНЫ</h4>
+                        <div class="mb-4">
+                            <template x-if="closeTableHookahs.length === 0">
+                                <p class="text-sm text-gray-500">За столом не было кальянов...</p>
+                            </template>
+                            <template x-if="closeTableHookahs.length > 0">
+                                <div class="space-y-1">
+                                    <template x-for="hookah in closeTableHookahs" :key="hookah.id">
+                                        <div class="text-sm text-gray-700">
+                                            <span x-text="hookah.name"></span>
+                                            <span x-show="hookah.quantity > 1" x-text="' × ' + hookah.quantity"></span>
+                                            <span x-text="' = ' + formatMoney(hookah.price * (hookah.quantity || 1))"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">ПРОДАЖИ</h4>
+                        <div class="mb-4">
+                            <template x-if="closeTableSales.length === 0">
+                                <p class="text-sm text-gray-500">Продаж не было...</p>
+                            </template>
+                            <template x-if="closeTableSales.length > 0">
+                                <div class="space-y-1">
+                                    <template x-for="sale in closeTableSales" :key="sale.id">
+                                        <div class="text-sm text-gray-700">
+                                            <span x-text="sale.product_name"></span>
+                                            <span x-text="' × ' + sale.quantity + ' = ' + formatMoney(sale.total)"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Способ оплаты -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Способ оплаты</label>
+                    <div class="flex items-center gap-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" 
+                                   name="payment_method" 
+                                   value="cash"
+                                   x-model="paymentMethod"
+                                   class="form-radio text-indigo-600">
+                            <span class="ml-2 text-sm text-gray-700">наличными</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" 
+                                   name="payment_method" 
+                                   value="card"
+                                   x-model="paymentMethod"
+                                   class="form-radio text-indigo-600">
+                            <span class="ml-2 text-sm text-gray-700">по карте</span>
+                        </label>
+                        <button type="button" class="text-sm text-blue-600 hover:text-blue-800 underline">
+                            Разделить
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Сотрудники -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Сотрудники</label>
+                    <select name="employee_id" 
+                            x-model="selectedEmployeeId"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none">
+                        <option value="">Выбрать...</option>
+                        @foreach($users as $user)
+                            <option value="{{ $user->id }}">{{ $user->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Комментарий -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Комментарий</label>
+                    <textarea name="comment" 
+                              x-model="closeTableComment"
+                              rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none"></textarea>
+                </div>
+
+                <!-- Кнопки -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t">
+                    <x-primary-button>Закрыть стол</x-primary-button>
+                    <button type="button"
+                            @click="showCloseTableModal = false"
+                            class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        Отмена
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         window.tablesPageData = function () {
             const openSalesBookingId = @json(session('open_sales_booking_id'));
+            const openHookahsBookingId = @json(request('open_hookahs'));
 
             return {
                 showModal: {{ $errors->any() ? 'true' : 'false' }},
                 showEditModal: false,
                 editTable: null,
+                tableMenuOpen: null,
                 tableNumbers: @json($tableNumbers),
                 selectedDate: @json($selectedDate),
                 bookingsData: @json($bookingsData),
                 products: @json($products),
                 categories: @json($categories),
                 warehouses: @json($warehouses),
+                hookahs: @json($hookahs),
+                hookahsByBooking: @json($hookahsByBooking),
                 salesByBooking: @json($salesByBooking),
+                users: @json($users),
                 showSalesModal: !!openSalesBookingId,
                 currentBookingId: openSalesBookingId || null,
+                showHookahsModal: !!openHookahsBookingId,
+                currentHookahBookingId: openHookahsBookingId || null,
+                selectedHookahId: null,
+                showCloseTableModal: false,
+                closeTableBookingId: null,
+                hookahsAmount: 0,
+                tipsAmount: 0,
+                salesAmount: 0,
+                discountAmount: 0,
+                discountType: 'rub',
+                paymentMethod: 'cash',
+                selectedEmployeeId: null,
+                closeTableComment: '',
 
                 get currentBooking() {
                     if (!this.currentBookingId) return null;
@@ -792,6 +1140,59 @@
                 openSalesForBooking(id) {
                     this.currentBookingId = id;
                     this.showSalesModal = true;
+                },
+
+                openHookahsForBooking(id) {
+                    this.currentHookahBookingId = id;
+                    this.showHookahsModal = true;
+                },
+
+                openCloseTableModal(id) {
+                    this.closeTableBookingId = id;
+                    const booking = this.bookingsData.find(b => b.id === id);
+                    if (booking) {
+                        // Подсчитываем суммы кальянов
+                        const hookahs = this.hookahsByBooking[id] || [];
+                        this.hookahsAmount = hookahs.reduce((sum, h) => sum + (parseFloat(h.price) * (h.quantity || 1)), 0);
+                        
+                        // Подсчитываем суммы продаж
+                        const sales = this.salesByBooking[id] || [];
+                        this.salesAmount = sales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
+                        
+                        // Сбрасываем остальные поля
+                        this.tipsAmount = 0;
+                        this.discountAmount = 0;
+                        this.discountType = 'rub';
+                        this.paymentMethod = 'cash';
+                        this.selectedEmployeeId = null;
+                        this.closeTableComment = '';
+                    }
+                    this.showCloseTableModal = true;
+                },
+
+                get currentHookahs() {
+                    if (!this.currentHookahBookingId) return [];
+                    return this.hookahsByBooking[this.currentHookahBookingId] || [];
+                },
+
+                get closeTableHookahs() {
+                    if (!this.closeTableBookingId) return [];
+                    return this.hookahsByBooking[this.closeTableBookingId] || [];
+                },
+
+                get closeTableSales() {
+                    if (!this.closeTableBookingId) return [];
+                    return this.salesByBooking[this.closeTableBookingId] || [];
+                },
+
+                get closeTableTotal() {
+                    let total = this.hookahsAmount + this.tipsAmount + this.salesAmount;
+                    if (this.discountType === 'rub') {
+                        total -= this.discountAmount;
+                    } else {
+                        total = total * (1 - this.discountAmount / 100);
+                    }
+                    return Math.max(0, total);
                 },
 
                 formatMoney(value) {

@@ -42,7 +42,7 @@
         <!-- Role -->
         <div class="mt-4">
             <x-input-label for="role" :value="__('Role')" />
-            <select id="role" name="role" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+            <select id="role" name="role" class="block mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 focus:outline-none" required>
                 <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Администратор</option>
                 <option value="director" {{ old('role') == 'director' ? 'selected' : '' }}>Директор</option>
             </select>
